@@ -1,0 +1,7 @@
+name=Craft Life
+author=Thedoctorjpg
+description=A Nude Food survival adventure in Aotearoa.
+bundleID=com.thedoctorjpg.craftlife
+version=1.0
+buildNumber=1
+imagePath=menu-icon
