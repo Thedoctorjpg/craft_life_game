@@ -5,23 +5,22 @@ Combat = {}
 local projectiles = {}
 
 function Combat:fire(x, y, direction, type)
-    local speed = 5
+    -- Cannons use heavy shells, Dragon uses fire breath
+    local speed = (type == "heavy_shell") and 3 or 5
     local vx, vy = 0, 0
     
-    -- Determine velocity based on player facing logic
     if direction == "left" then vx = -speed
     elseif direction == "right" then vx = speed
     elseif direction == "up" then vy = -speed
     elseif direction == "down" then vy = speed
+    else vx = speed -- Default right
     end
 
     local proj = {
-        x = x,
-        y = y,
-        vx = vx,
-        vy = vy,
-        life = 40, -- frames until it fades
-        type = type
+        x = x, y = y, vx = vx, vy = vy,
+        life = 45,
+        type = type,
+        radius = (type == "heavy_shell") and 15 or 6 -- Explosive radius
     }
     table.insert(projectiles, proj)
 end
@@ -33,25 +32,27 @@ function Combat:update()
         p.y += p.vy
         p.life -= 1
         
-        -- Draw the projectile (a simple flickering circle for fire)
+        -- Draw Projectile
         gfx.setColor(gfx.kColorBlack)
-        if p.life % 4 < 2 then -- Simple flicker effect
-            gfx.fillCircleAtPoint(p.x, p.y, 4)
+        if p.type == "heavy_shell" then
+            gfx.fillCircleAtPoint(p.x, p.y, 5) -- Cannon ball
         else
-            gfx.drawCircleAtPoint(p.x, p.y, 3)
+            if p.life % 4 < 2 then gfx.fillCircleAtPoint(p.x, p.y, 4)
+            else gfx.drawCircleAtPoint(p.x, p.y, 3) end
         end
         
-        -- Collision check with enemies
-        for j = #Enemies.activeEnemies, 1, -1 do
-            local e = Enemies.activeEnemies[j]
+        -- Collision with Enemies
+        for j = #Enemies.activeEntities, 1, -1 do
+            local e = Enemies.activeEntities[j]
             local dx = p.x - e.x
             local dy = p.y - e.y
             local dist = math.sqrt(dx*dx + dy*dy)
             
-            if dist < 12 then
-                e.hp -= 5 -- High dragon damage
-                p.life = 0 -- Destroy projectile on hit
-                print("Direct hit!")
+            if dist < p.radius then
+                local damage = (p.type == "heavy_shell") and 10 or 5
+                e.hp -= damage
+                p.life = 0 -- Destroy projectile
+                print("Hit for " .. damage)
             end
         end
 

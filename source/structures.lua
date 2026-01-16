@@ -22,7 +22,21 @@ function Structures:build(x, y, type)
     }
     table.insert(self.active, s)
 end
+-- structures.lua additions to defenseTypes
+local defenseTypes = {
+    -- ... existing structures ...
+    stable = { hp = 100, type = "housing", capacity = 1 },
+    barn = { hp = 150, type = "storage", capacity = 10 }
+}
 
+-- Add a function to "park" the horse in the stable
+function Structures:stowHorse(s, horse)
+    if s.type == "housing" and not s.occupied then
+        s.occupied = true
+        horse.active = false -- Hide horse from world while in stable
+        print("Horse is safe in the stable.")
+    end
+end
 function Structures:update(enemies)
     for i = #self.active, 1, -1 do
         local s = self.active[i]
